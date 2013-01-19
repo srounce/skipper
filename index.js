@@ -5,8 +5,10 @@ var fs = require('fs')
   , libutil = require('./lib/util')
   , _;
 
-var validFormats = ['js', 'coffee']
+var Controller = require('./lib/controller')
   , LoaderContext = require('./lib/loadercontext');
+
+var validFormats = ['js', 'coffee'];
 
 module.exports = Skipper
 
@@ -41,9 +43,9 @@ Skipper.prototype.register = function register( controllerPath, callback )
 
 Skipper.prototype.registerController = function registerController( controller )
 {
-  var ctrlrName = controller.name;
+  var ctrlr = new Controller(controller);
 
-  this._controllers[ctrlrName] = controller;
+  this._controllers[controller.name] = new Controller(controller);
 }
 
 Skipper.prototype.controller = function controller( name )
