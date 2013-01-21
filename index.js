@@ -1,14 +1,13 @@
 var fs = require('fs')
   , path = require('path')
   , util = require('util')
-  , EventEmitter = require('events').EventEmitter
-  , libutil = require('./lib/util')
-  , _;
+  , EventEmitter = require('events').EventEmitter;
 
 var Controller = require('./lib/controller')
+  , libutil = require('./lib/util')
   , LoaderContext = require('./lib/loadercontext');
 
-var validFormats = ['js', 'coffee'];
+var validFormats = module.validFormats = ['js', 'coffee'];
 
 module.exports = Skipper
 
@@ -23,21 +22,16 @@ Skipper.prototype.register = function register( controllerPath, callback )
 {
   var controllers = fs.readdirSync(controllerPath)
     , isSync = (callback === undefined);
+
   callback = callback || null;
 
   controllers = controllers.filter(function( controller ) {
     return validFormats.indexOf( path.extname(controller).replace('.','') ) >= 0;
-  }.bind(this));
+  });
 
-  controllers.forEach(function( controller, index ) {
-    console.log(controller.replace(new RegExp("\.("+validFormats.join('|')+")$", "gi"), ''));
-
-    var source = require('fs').readFileSync( path.join('./controllers/', controller) )
-      , loader = new Function('context', 'with (context) {\n' + source + '\n }')
-      , ctx = new LoaderContext(this);
-
-    loader(ctx);
-
+  controllers.forEach(function( file, index ) {
+    var fullPath = path.join(controllerPath, file);
+    Controller.load(fullPath, new LoaderContext(this));
   }.bind(this));
 }
 
